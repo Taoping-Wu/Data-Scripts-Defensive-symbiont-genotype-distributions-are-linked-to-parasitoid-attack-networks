@@ -11,7 +11,7 @@ The data and scripts for paper - Defensive symbiont genotype distributions are l
 
 5. Hamiltonella_Aphid_matrix_16species.csv & Hamiltonella_Aphid_matrix_22species.csv & Hamiltonella_Aphid_matrix_31species.csv & Para_Aphid_matrix_16species.csv & Para_Aphid_matrix_22species.csv & Plant_Aphid_matrix_16species.csv & Plant_Aphid_matrix_31species.csv were the matrixes derived from Table_S2, The Row of them reprensent the Aphid species, the Column represent the Hamiltonella strains/Parasitoid species/Host plant species linked to each aphid species.
 
-6. Data_17_Parasitoid_species_aphid_22_species_Fig.1.csv & Data_18_Plant_genus_aphid_31_species_Fig.1.csv were the reduced matrix only for generating Fig. 1.
+6. Data_17_Parasitoid_genus_aphid_22_species_Fig.1.csv & Data_18_Plant_genus_aphid_31_species_Fig.1.csv were the reduced matrix only for generating Fig. 1.
 
 
 
