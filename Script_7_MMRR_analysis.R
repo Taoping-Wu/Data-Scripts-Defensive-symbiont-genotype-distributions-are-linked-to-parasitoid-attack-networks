@@ -13,7 +13,7 @@ aphid_genetic <- dist.gene(dna_sequences, method = "pairwise", pairwise.deletion
                            variance = FALSE)
 genetic_distances_matrix <- as.matrix(aphid_genetic)
 
-#the biggest value in this genetic distance file is 1.06, to normalize this, we divided all value by 1.06 manually. 
+#the biggest distance value in this genetic distance file is 1.06, to normalize this, we divided all value by 1.06 manually. 
 write.csv(genetic_distances_matrix, file = "genetic distance.csv")
 
 
@@ -28,6 +28,8 @@ library(vegan)
 ############
 ### MMRR ###
 ############
+
+#the MMRR analysis code is generated from Wang 2013. https://doi.org/10.1111/evo.12134
 
 # MMRR performs Multiple Matrix Regression with Randomization analysis
 # Y is a dependent distance matrix
@@ -102,19 +104,47 @@ setwd("C:/Users/wtp25/Desktop/En taro Feng Huan/PhD in QMUL/Research/Distributio
 Para <- read.csv("Para_Aphid_matrix_22species.csv", header=T, row.names = 1)
 Para.dists <- vegdist(Para, method = "bray") # Bray–Curtis dissimilarity
 Para.dists <- as.matrix(Para.dists)
-
+Para.dists <- 1-Para.dists         #as we are using 1-Bray–Curtis, similarity
 # read aphid genetic distance matrix
 Aphid <- read.csv("Aphid_phylogenetic_relatedness_22species.csv", header=T, row.names = 1)
 Aphid.dists <- as.matrix(Aphid)
-
+Aphid.dists <- 1-Aphid.dists      #as we are using 1-Bray–Curtis, similarity
 #read Hamiltonella matrix, convert into Bray-Curtis dissimilarity list (as the Y dependent distance matrix is a list)
 Ham <- read.csv("Hamiltonella_Aphid_matrix_22species.csv", header=T, row.names = 1)
 Ham.dists <- as.matrix(vegdist(Ham, method = "bray")) # Bray–Curtis dissimilarity
-
+Ham.dists <- 1-Ham.dists                              #as we are using 1-Bray–Curtis, similarity
 # Combine predictor matrices into a list
 predictors <- list(X1 = Para.dists, X2 = Aphid.dists)
 # Run MMRR
 result <- MMRR(Ham.dists, predictors, nperm = 9999)
+
+### 16 species, reduced model
+
+# read parasitoid matrix, convert into Bray-Curtis dissimilarity matrix
+Para <- read.csv("Para_Aphid_matrix_16species.csv", header=T, row.names = 1)
+Para.dists <- vegdist(Para, method = "bray") # Bray–Curtis dissimilarity
+Para.dists <- as.matrix(Para.dists)
+Para.dists <- 1-Para.dists         #as we are using 1-Bray–Curtis, similarity
+# read aphid genetic distance matrix
+Aphid <- read.csv("Aphid_phylogenetic_relatedness_16species.csv", header=T, row.names = 1)
+Aphid.dists <- as.matrix(Aphid)
+Aphid.dists <- 1-Aphid.dists      #as we are using 1-Bray–Curtis, similarity
+#read Hamiltonella matrix, convert into Bray-Curtis dissimilarity list (as the Y dependent distance matrix is a list)
+Ham <- read.csv("Hamiltonella_Aphid_matrix_16species.csv", header=T, row.names = 1)
+Ham.dists <- as.matrix(vegdist(Ham, method = "bray")) # Bray–Curtis dissimilarity
+Ham.dists <- 1-Ham.dists                              #as we are using 1-Bray–Curtis, similarity
+# Combine predictor matrices into a list
+predictors <- list(X1 = Para.dists, X2 = Aphid.dists)
+# Run MMRR - two predictors model
+result <- MMRR(Ham.dists, predictors, nperm = 9999)
+
+# single predictor models
+predictors <- list(X1 = Para.dists)
+result <- MMRR(Ham.dists, predictors, nperm = 9999)
+predictors <- list(X1 = Aphid.dists)
+result <- MMRR(Ham.dists, predictors, nperm = 9999)
+# predictors interaction model
+result <- MMRR(Para.dists, predictors, nperm = 9999)
 
 # View the results
 print(result$coefficients)  # Regression coefficients
@@ -127,51 +157,39 @@ print(result$tpvalue)      # P-values for each predictor
 
 ### Plant & Aphid distance as predictors, Hamiltonella as dependent matrix
 
-Plant <- read.csv("Plant_Aphid_matrix_31species.csv", header=T, row.names = 1)
+Plant <- read.csv("Plant_Aphid_matrix_16species.csv", header=T, row.names = 1)
 Plant.dists <- as.matrix(vegdist(Plant, method = "bray")) # Bray–Curtis dissimilarity
-
-Aphid <- read.csv("Aphid_phylogenetic_relatedness_31species.csv", header=T, row.names = 1)
+Para.dists  <- 1-Para.dists                               #as we are using 1-Bray–Curtis, similarity
+Aphid <- read.csv("Aphid_phylogenetic_relatedness_16species.csv", header=T, row.names = 1)
 Aphid.dists <- as.matrix(Aphid)
-
-Ham <- read.csv("Hamiltonella_Aphid_matrix_31species.csv", header=T, row.names = 1)
+Aphid.dists <- 1-Aphid.dists                              #as we are using 1-Bray–Curtis, similarity
+Ham <- read.csv("Hamiltonella_Aphid_matrix_16species.csv", header=T, row.names = 1)
 Ham.dists <- as.matrix(vegdist(Ham, method = "bray")) # Bray–Curtis dissimilarity
-
+Ham.dists <- 1-Ham.dists                              #as we are using 1-Bray–Curtis, similarity
 
 # Combine predictor matrices into a list
 predictors <- list(X1 = Plant.dists, X2 = Aphid.dists)
 # Run MMRR
 result <- MMRR(Ham.dists, predictors, nperm = 9999)
 
+
+# single predictor models
+predictors <- list(X1 = Plant.dists)
+result <- MMRR(Ham.dists, predictors, nperm = 9999)
+predictors <- list(X1 = Aphid.dists)
+result <- MMRR(Ham.dists, predictors, nperm = 9999)
+# predictors interaction model
+result <- MMRR(Plant.dists, predictors, nperm = 9999)
+
+
 # View the results
 print(result$coefficients)  # Regression coefficients
 print(result$tpvalue)      # P-values for each predictor
 
 
-###############
-### both 22 ###
-###############
 
-Para <- read.csv("Para_Aphid_matrix_22species.csv", header=T, row.names = 1)
-Para.dists <- vegdist(Para, method = "bray") # Bray–Curtis dissimilarity
-Para.dists <- as.matrix(Para.dists)
-
-Plant <- read.csv("Plant_Aphid_matrix_22species.csv", header=T, row.names = 1)
-Plant.dists <- vegdist(Plant, method = "bray") # Bray–Curtis dissimilarity
-Plant.dists <- as.matrix(Plant.dists)
-
-Aphid <- read.csv("Aphid_phylogenetic_relatedness_22species.csv", header=T, row.names = 1)
-Aphid.dists <- as.matrix(Aphid)
-
-Ham <- read.csv("Hamiltonella_Aphid_matrix_22species.csv", header=T, row.names = 1)
-Ham.dists <- as.matrix(vegdist(Ham, method = "bray")) # Bray–Curtis dissimilarity
 
 # Combine predictor matrices into a list
-predictors <- list(X1 = Para.dists, X2 = Plant.dists, X3 = Aphid.dists)
+predictors <- list(X1 =Para.dists, X2 =Plant.dists, X3 = Aphid.dists)
 # Run MMRR
 result <- MMRR(Ham.dists, predictors, nperm = 9999)
-
-# View the results
-print(result$coefficients)  # Regression coefficients
-print(result$tpvalue)      # P-values for each predictor
-
-
