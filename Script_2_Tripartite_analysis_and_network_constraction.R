@@ -12,8 +12,239 @@ library(ggplot2)
 setwd("your data folder")
 
 
+###################
+### MMRR Figure ###
+###################
 
+# To use a single continous value in all analysis of this paper, we use similarity (1- Bary-Curtis dissimialrity) in all analysis
+
+#Fig 3 B,F and Fig S5 B
+
+# load data - aphid distance-Hamiltonella all years data. (change the 31,22,16 to fix the detailed figure)
+aph <- read.csv("Aphid_phylogenetic_relatedness_31species.csv", header=T, row.names = 1)     #Aphid matrix
+aph.symb <- read.csv("Hamiltonella_Aphid_matrix_31species.csv", header=T, row.names = 1)     #symb matrix
+# load data - aphid distance-Hamiltonella all years data,22 species. 
+aph <- read.csv("Aphid_phylogenetic_relatedness_22species.csv", header=T, row.names = 1)     #Aphid matrix
+aph.symb <- read.csv("Hamiltonella_Aphid_matrix_22species.csv", header=T, row.names = 1)     #symb matrix
+# load data - aphid distance-Hamiltonella all years data,22 species. 
+aph <- read.csv("Aphid_phylogenetic_relatedness_16species.csv", header=T, row.names = 1)     #Aphid matrix
+aph.symb <- read.csv("Hamiltonella_Aphid_matrix_16species.csv", header=T, row.names = 1)     #symb matrix
+
+aph.y.dists <- as.dist(aph)
+aph.x.dists <- vegdist(aph.symb, method = "bray") # Bray–Curtis dissimilarity
+
+# convert dissimilarity to similarity
+aph.y.similarity <- 1 - aph.y.dists
+aph.x.similarity <- 1 - aph.x.dists
+
+#run Mantel test - this first calculates a standard correlation coefficient between the two matrices, disregarding the fact that they represent pairwise comparisons, so this cannot be intepreted in the usual way
+data <- data.frame(aph.x.similarity, aph.y.similarity)
+p <- ggplot(data, aes(y = aph.x.similarity, x = aph.y.similarity)) +
+  geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
+  labs(x = "Aphid genetic distance", y = "Symbiont composition similarity") +
+  ylim(0,1)+
+  theme_bw()+
+  theme(plot.title = element_text(size = 14, face =  "bold"),
+        text = element_text(size = 12),
+        axis.title = element_text(face="bold"),
+        axis.text.x=element_text(size = 18),
+        axis.text.y=element_text(size = 18),
+        panel.grid.major = element_blank(),  # remove major grid lines
+        panel.grid.minor = element_blank())
+print(p)
+
+#Fig 3 C and Fig S5 C
+# load data - aphid distance-Parasitoid data. 
+aph.para <- read.csv("Para_Aphid_matrix_22species.csv", header=T, row.names = 1)           #Para matrix
+aph <- read.csv("Aphid_phylogenetic_relatedness_22species.csv", header=T, row.names = 1)     #symb matrix
+aph.para <- read.csv("Para_Aphid_matrix_16species.csv", header=T, row.names = 1)           #Para matrix
+aph <- read.csv("Aphid_phylogenetic_relatedness_16species.csv", header=T, row.names = 1)     #symb matrix
+
+aph.para.dists <- vegdist(aph.para, method = "bray") # Bray–Curtis dissimilarity 
+aph.dists  <- as.dist(aph) #
+
+
+# convert dissimilarity to similarity
+aph.para.similarity <- 1 - aph.para.dists
+aph.dists.similarity <- 1 - aph.dists
+
+##plotting in base R
+par(mfrow=c(1,2))
+data <- data.frame(aph.para.similarity, aph.dists.similarity)
+p <- ggplot(data, aes(y = aph.para.similarity, x = aph.dists.similarity)) +
+  geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
+  labs(y = "Parasitoid composition similarity", x = "Aphid genetic distance") +
+  ylim(0,0.65)+
+  theme_bw()+
+  theme(plot.title = element_text(size = 14, face =  "bold"),
+        text = element_text(size = 12),
+        axis.title = element_text(face="bold"),
+        axis.text.x=element_text(size = 18),
+        axis.text.y=element_text(size = 18),
+        panel.grid.major = element_blank(),  # remove major grid lines
+        panel.grid.minor = element_blank())
+print(p)
+
+
+#######################
+### Figure 3_MMRR_D ###
+#######################
+
+# load data - aphid distance-Parasitoid data. 
+aph.para <- read.csv("Para_Aphid_matrix_22species.csv", header=T, row.names = 1)           #plant matrix
+aph <- read.csv("Aphid_phylogenetic_relatedness_22species.csv", header=T, row.names = 1)     #symb matrix
+aph.ham <- read.csv("Hamiltonella_Aphid_matrix_22species.csv", header=T, row.names = 1)     #symb matrix
+
+aph.para <- read.csv("Para_Aphid_matrix_16species.csv", header=T, row.names = 1)           #plant matrix
+aph <- read.csv("Aphid_phylogenetic_relatedness_16species.csv", header=T, row.names = 1)     #symb matrix
+aph.ham <- read.csv("Hamiltonella_Aphid_matrix_16species.csv", header=T, row.names = 1)     #symb matrix
+
+
+aph.para.dists <- vegdist(aph.para, method = "bray") # Bray–Curtis dissimilarity 
+aph.symb.dists <- vegdist(aph.ham, method = "bray")  #
+aph.aph.dists  <- as.dist(aph) #
+
+
+# convert dissimilarity to similarity
+aph.high.similarity <- 1 - (0.378*aph.para.dists + 0.472*aph.aph.dists)
+aph.symb.similarity <- 1 - aph.symb.dists
+
+##plotting in base R
+par(mfrow=c(1,2))
+data <- data.frame(aph.high.similarity, aph.symb.similarity)
+p <- ggplot(data, aes(x = aph.high.similarity, y = aph.symb.similarity)) +
+  geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
+  labs(y = "Parasitoid composition similarity", x = "Aphid genetic distance") +
+  #ylim(0,0.6)+
+  theme_bw()+
+  theme(plot.title = element_text(size = 14, face =  "bold"),
+        text = element_text(size = 12),
+        axis.title = element_text(face="bold"),
+        axis.text.x=element_text(size = 18),
+        axis.text.y=element_text(size = 18),
+        panel.grid.major = element_blank(),  # remove major grid lines
+        panel.grid.minor = element_blank())
+print(p)
+print(mantel.result)
+
+
+
+#########################
+### Figure Plant MMRR ###
+#########################
+#####Figure Size: W = 720, H =720
+
+# load data - aphid distance-Parasitoid data. 
+aph.plant <- read.csv("Plant_Aphid_matrix_31species.csv", header=T, row.names = 1)           #plant matrix
+aph.symb <- read.csv("Hamiltonella_Aphid_matrix_31species.csv", header=T, row.names = 1)     #symb matrix
+# load data - aphid distance-Parasitoid data. 
+aph.plant <- read.csv("Plant_Aphid_matrix_16species.csv", header=T, row.names = 1)           #plant matrix
+aph.symb <- read.csv("Hamiltonella_Aphid_matrix_16species.csv", header=T, row.names = 1)     #symb matrix
+
+aph.high.dists <- vegdist(aph.plant, method = "bray") # Bray–Curtis dissimilarity 
+aph.symb.dists <- vegdist(aph.symb, method = "bray") # Bray–Curtis dissimilarity 
+
+# convert dissimilarity to similarity
+aph.high.similarity <- 1 - aph.high.dists
+aph.symb.similarity <- 1 - aph.symb.dists
+
+data <- data.frame(aph.high.similarity, aph.symb.similarity)
+p <- ggplot(data, aes(y = aph.high.similarity, x = aph.symb.similarity)) +
+  geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
+  labs(x = "Plant composition similarity", y = "Hamiltonella") +
+  #ylim(0,0.75)+
+  theme_bw()+
+  theme(plot.title = element_text(size = 14, face =  "bold"),
+        text = element_text(size = 12),
+        axis.title = element_text(face="bold"),
+        axis.text.x=element_text(size = 18),
+        axis.text.y=element_text(size = 18),
+        panel.grid.major = element_blank(),  # remove major grid lines
+        panel.grid.minor = element_blank())
+print(p)
+
+
+
+
+
+
+
+
+
+
+#Fig. 3 G and Fig S5 F
+
+# load data - aphid distance-Parasitoid data. 
+aph.plant <- read.csv("Plant_Aphid_matrix_31species.csv", header=T, row.names = 1)           #plant matrix
+aph <- read.csv("Aphid_phylogenetic_relatedness_31species.csv", header=T, row.names = 1)     #symb matrix
+# load data - aphid distance-Parasitoid data. 
+aph.plant <- read.csv("Plant_Aphid_matrix_16species.csv", header=T, row.names = 1)           #plant matrix
+aph <- read.csv("Aphid_phylogenetic_relatedness_16species.csv", header=T, row.names = 1)     #symb matrix
+
+aph.plant.dists <- vegdist(aph.plant, method = "bray") # Bray–Curtis dissimilarity 
+aph.dists <- as.dist(aph) # Bray–Curtis dissimilarity 
+
+# convert dissimilarity to similarity
+aph.plant.similarity <- 1 - aph.plant.dists
+aph.similarity <- 1 - aph.dists
+
+data <- data.frame(aph.plant.similarity, aph.similarity)
+p <- ggplot(data, aes(y = aph.plant.similarity, x = aph.similarity)) +
+  geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
+  labs(y = "Plant composition similarity", x = "Aphid genetic distance") +
+  ylim(0,0.6)+
+  theme_bw()+
+  theme(plot.title = element_text(size = 14, face =  "bold"),
+        text = element_text(size = 12),
+        axis.title = element_text(face="bold"),
+        axis.text.x=element_text(size = 18),
+        axis.text.y=element_text(size = 18),
+        panel.grid.major = element_blank(),  # remove major grid lines
+        panel.grid.minor = element_blank())
+print(p)
+
+
+
+
+
+# load data - aphid distance-Parasitoid data. 
+aph.plant <- read.csv("Plant_Aphid_matrix_16species.csv", header=T, row.names = 1)           #plant matrix
+aph <- read.csv("Aphid_phylogenetic_relatedness_16species.csv", header=T, row.names = 1)     #symb matrix
+aph.ham <- read.csv("Hamiltonella_Aphid_matrix_16species.csv", header=T, row.names = 1)     #symb matrix
+
+aph.plant.dists <- vegdist(aph.plant, method = "bray") # Bray–Curtis dissimilarity 
+aph.symb.dists <- vegdist(aph.ham, method = "bray")  #
+aph.aph.dists  <- as.dist(aph) #
+
+
+# convert dissimilarity to similarity
+aph.high.similarity <- 1 - (-0.06*aph.plant.dists + 0.60*aph.aph.dists)
+aph.symb.similarity <- 1 - aph.symb.dists
+
+data <- data.frame(aph.high.similarity, aph.symb.similarity)
+p <- ggplot(data, aes(x = aph.high.similarity, y = aph.symb.similarity)) +
+  geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
+  geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
+  labs(x = "mix", y = "Ham") +
+  #ylim(0,0.6)+
+  theme_bw()+
+  theme(plot.title = element_text(size = 14, face =  "bold"),
+        text = element_text(size = 12),
+        axis.title = element_text(face="bold"),
+        axis.text.x=element_text(size = 18),
+        axis.text.y=element_text(size = 18),
+        panel.grid.major = element_blank(),  # remove major grid lines
+        panel.grid.minor = element_blank())
+print(p)
+
+##############################
 #### code for mantel test ####
+##############################
 create_aphid_mantel <- function(aph.high, aph.symb) {
   
   #create matrices for pairwise distances between aphid species in terms of 
@@ -25,7 +256,7 @@ create_aphid_mantel <- function(aph.high, aph.symb) {
   aph.high.similarity <- 1 - aph.high.dists
   aph.symb.similarity <- 1 - aph.symb.dists
   
-  #run Mantel test - this first calculates a standard correlation coefficient between the two matrices, disregarding the fact that they represent pairwise comparisons, so this cannot be intepreted in the usual way
+  # run Mantel test - this first calculates a standard correlation coefficient between the two matrices, disregarding the fact that they represent pairwise comparisons, so this cannot be intepreted in the usual way
   # the test then repeatedly shuffles one of the matrices at random, recalculating the correlation coefficient each time. This generates a null distribution, which the observed value is compared with to generate a P-value
   mantel.result <- mantel(aph.high.similarity, aph.symb.similarity, method = "pearson", permutations = 9999, na.rm = TRUE)
   ##plotting in base R
@@ -173,8 +404,8 @@ write.csv(result, file = "plant_similarity_allYear.csv")
 
 
 # load data - only for 2021-2022 year data, Mummies only
-aph.para <- read.csv("Plant_Aphid_matrix_16species_2years.csv", header=T, row.names = 1)      #plant matrix
-aph.symb <- read.csv("Hamiltonella_Aphid_matrix_16species_2years.csv", header=T, row.names = 1)#symb matrix
+aph.para <- read.csv("Plant_Aphid_matrix_16species_2years.csv", header=T, row.names = 1)        #plant matrix
+aph.symb <- read.csv("Hamiltonella_Aphid_matrix_16species_2years.csv", header=T, row.names = 1) #symb matrix
 
 create_aphid_mantel(aph.para, aph.symb)       # Mantel's test
 result <- create_aphid_network("aphid_host_info.csv", aph.para, aph.symb)    # network figure
@@ -193,74 +424,32 @@ write.csv(dist_matrix, file = "genetic distance_31species.csv")
 
 
 
+#####Figure Size: W = 720, H =720 ###
+#Fig 3 A and Fig S5 A
 
+# load data - Para-Hamiltonella all years data. (change the 22,16 to fix the detailed figure)
 
+# load data - aphid distance-Hamiltonella all years data,22 species. 
+Par <- read.csv("Para_Aphid_matrix_22species.csv", header=T, row.names = 1)     #Aphid matrix
+aph.symb <- read.csv("Hamiltonella_Aphid_matrix_22species.csv", header=T, row.names = 1)     #symb matrix
 
+# load data - aphid distance-Hamiltonella all years data,16 species. 
+Par <- read.csv("Para_Aphid_matrix_16species.csv", header=T, row.names = 1)     #Aphid matrix
+aph.symb <- read.csv("Hamiltonella_Aphid_matrix_16species.csv", header=T, row.names = 1)     #symb matrix
 
-
-
-#####Figure Size: W = 720, H =720
-# load data - aphid distance-Hamiltonella all years data, 31 species model. 
-aph <- read.csv("genetic distance_31species.csv", header=T, row.names = 1)           #aphid genetic distance matrix
-aph.symb <- read.csv("Hamiltonella_Aphid_matrix_31species.csv", header=T, row.names = 1)     #symb matrix
-### option
-# load data - aphid distance-Hamiltonella all years data, 22 species model. 
-# aph <- read.csv("genetic distance_22species.csv", header=T, row.names = 1)           #aphid genetic distance matrix
-# aph.symb <- read.csv("Hamiltonella_Aphid_matrix_22species.csv", header=T, row.names = 1)     #symb matrix
-
-
-aph.y.dists <- as.dist(aph)
+Par.y.dists <- vegdist(Par, method = "bray") # Bray–Curtis dissimilarity
 aph.x.dists <- vegdist(aph.symb, method = "bray") # Bray–Curtis dissimilarity
 
 # convert dissimilarity to similarity
-aph.y.similarity <- 1 - aph.y.dists
+Par.y.similarity <- 1 - Par.y.dists
 aph.x.similarity <- 1 - aph.x.dists
 
 #run Mantel test - this first calculates a standard correlation coefficient between the two matrices, disregarding the fact that they represent pairwise comparisons, so this cannot be intepreted in the usual way
-# the test then repeatedly shuffles one of the matrices at random, recalculating the correlation coefficient each time. This generates a null distribution, which the observed value is compared with to generate a P-value
-mantel.result <- mantel(aph.y.similarity, aph.x.similarity, method = "pearson", permutations = 9999, na.rm = TRUE)
-##plotting in base R
-par(mfrow=c(1,2))
-data <- data.frame(aph.x.similarity, aph.y.similarity)
-p <- ggplot(data, aes(y = aph.x.similarity, x = aph.y.similarity)) +
+data <- data.frame(aph.x.similarity, Par.y.similarity)
+p <- ggplot(data, aes(y = aph.x.similarity, x = Par.y.similarity)) +
   geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
   geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
-  labs(x = "Aphid genetic distance", y = "Symbiont composition similarity") +
-  ylim(0,1)+
-  theme_bw()+
-  theme(plot.title = element_text(size = 14, face =  "bold"),
-        text = element_text(size = 12),
-        axis.title = element_text(face="bold"),
-        axis.text.x=element_text(size = 18),
-        axis.text.y=element_text(size = 18),
-        panel.grid.major = element_blank(),  # remove major grid lines
-        panel.grid.minor = element_blank())
-print(p)
-print(mantel.result)
-
-#####Figure Size: W = 720, H =720
-# load data - aphid distance-Parasitoid data. 
-aph.para <- read.csv("Para_Aphid_matrix_22species.csv", header=T, row.names = 1)           #plant matrix
-aph <- read.csv("genetic distance_22species.csv", header=T, row.names = 1)     #symb matrix
-
-
-aph.high.dists <- vegdist(aph.para, method = "bray") # Bray–Curtis dissimilarity 
-aph.symb.dists <- as.dist(aph) # 
-
-# convert dissimilarity to similarity
-aph.high.similarity <- 1 - aph.high.dists
-aph.symb.similarity <- 1 - aph.symb.dists
-
-#run Mantel test - this first calculates a standard correlation coefficient between the two matrices, disregarding the fact that they represent pairwise comparisons, so this cannot be intepreted in the usual way
-# the test then repeatedly shuffles one of the matrices at random, recalculating the correlation coefficient each time. This generates a null distribution, which the observed value is compared with to generate a P-value
-mantel.result <- mantel(aph.high.similarity, aph.symb.similarity, method = "pearson", permutations = 9999, na.rm = TRUE)
-##plotting in base R
-par(mfrow=c(1,2))
-data <- data.frame(aph.high.similarity, aph.symb.similarity)
-p <- ggplot(data, aes(x = aph.high.similarity, y = aph.symb.similarity)) +
-  geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
-  geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
-  labs(x = "Parasitoid composition similarity", y = "Aphid genetic distance") +
+  labs(x = "Parasitoid", y = "Symbiont composition similarity") +
   #ylim(0,1)+
   theme_bw()+
   theme(plot.title = element_text(size = 14, face =  "bold"),
@@ -271,40 +460,10 @@ p <- ggplot(data, aes(x = aph.high.similarity, y = aph.symb.similarity)) +
         panel.grid.major = element_blank(),  # remove major grid lines
         panel.grid.minor = element_blank())
 print(p)
-print(mantel.result)
 
 
-#####Figure Size: W = 720, H =720
-# load data - aphid distance-Parasitoid data. 
-aph.para <- read.csv("Plant_Aphid_matrix_31species.csv", header=T, row.names = 1)           #plant matrix
-aph <- read.csv("genetic distance_divided106.csv", header=T, row.names = 1)     #symb matrix
 
 
-aph.high.dists <- vegdist(aph.para, method = "bray") # Bray–Curtis dissimilarity 
-aph.symb.dists <- as.dist(aph) # 
 
-# convert dissimilarity to similarity
-aph.high.similarity <- 1 - aph.high.dists
-aph.symb.similarity <- 1 - aph.symb.dists
 
-#run Mantel test - this first calculates a standard correlation coefficient between the two matrices, disregarding the fact that they represent pairwise comparisons, so this cannot be intepreted in the usual way
-# the test then repeatedly shuffles one of the matrices at random, recalculating the correlation coefficient each time. This generates a null distribution, which the observed value is compared with to generate a P-value
-mantel.result <- mantel(aph.high.similarity, aph.symb.similarity, method = "pearson", permutations = 9999, na.rm = TRUE)
-##plotting in base R
-par(mfrow=c(1,2))
-data <- data.frame(aph.high.similarity, aph.symb.similarity)
-p <- ggplot(data, aes(y = aph.high.similarity, x = aph.symb.similarity)) +
-  geom_point(alpha = 0.5, shape = 1, size = 4, stroke = 1,color = "black") +
-  geom_smooth(method = "lm", se = TRUE, color = "blue",level = 0.95) +  # add regression line with CI
-  labs(y = "Plant composition similarity", x = "Aphid genetic distance") +
-  ylim(0,0.75)+
-  theme_bw()+
-  theme(plot.title = element_text(size = 14, face =  "bold"),
-        text = element_text(size = 12),
-        axis.title = element_text(face="bold"),
-        axis.text.x=element_text(size = 18),
-        axis.text.y=element_text(size = 18),
-        panel.grid.major = element_blank(),  # remove major grid lines
-        panel.grid.minor = element_blank())
-print(p)
-print(mantel.result)
+
